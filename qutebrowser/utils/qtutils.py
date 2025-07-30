@@ -58,7 +58,7 @@ class QtOSError(OSError):
         qt_errno: The error attribute of the given QFileDevice, if applicable.
     """
 
-    def __init__(self, dev: QIODevice, msg: str = None) -> None:
+    def __init__(self, dev: QIODevice, msg: str | None = None) -> None:
         if msg is None:
             msg = dev.errorString()
 
@@ -387,7 +387,7 @@ class PyQIODevice(io.BufferedIOBase):
 
         return self.dev.pos()
 
-    def truncate(self, size: int = None) -> int:
+    def truncate(self, size: int | None = None) -> int:
         raise io.UnsupportedOperation
 
     @property
@@ -459,7 +459,7 @@ class PyQIODevice(io.BufferedIOBase):
             raise QtOSError(self.dev)
         return num
 
-    def read(self, size: Optional[int] = None) -> bytes:
+    def read(self, size: Optional[int] | None = None) -> bytes:
         self._check_open()
         self._check_readable()
 
@@ -510,7 +510,7 @@ class EventLoop(QEventLoop):
     Raises an exception when doing exec() multiple times.
     """
 
-    def __init__(self, parent: QObject = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._executing = False
 

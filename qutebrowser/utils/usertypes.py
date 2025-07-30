@@ -56,7 +56,7 @@ class NeighborList(Sequence[_T]):
         edge = enum.auto()
         exception = enum.auto()
 
-    def __init__(self, items: Sequence[_T] = None,
+    def __init__(self, items: Sequence[_T] | None = None,
                  default: Union[_T, Unset] = UNSET,
                  mode: Modes = Modes.exception) -> None:
         """Constructor.
@@ -133,22 +133,24 @@ class NeighborList(Sequence[_T]):
             The new item.
         """
         assert self._idx is not None
+
+        new: _T  # Explicitly declare type
+    
         try:
             if self._idx + offset >= 0:
                 new = self._items[self._idx + offset]
             else:
-                raise IndexError
-        except IndexError:
+                raise IndexError(f"Negative offset {offset} not allowed")
+        except IndexError as e:
             if self._mode == self.Modes.edge:
                 assert offset != 0
-                if offset > 0:
-                    new = self.lastitem()
-                else:
-                    new = self.firstitem()
-            elif self._mode == self.Modes.exception:  # pragma: no branch
-                raise
-        else:
-            self._idx += offset
+                new = self.lastitem() if offset > 0 else self.firstitem()
+            elif self._mode == self.Modes.exception:
+                raise IndexError(f"Offset {offset} out of bounds") from e
+            else:  # pragma: no cover
+                raise ValueError(f"Unknown mode: {self._mode}")
+    
+        self._idx += offset
         return new
 
     @property
@@ -391,7 +393,7 @@ class Question(QObject):
     answered_no = pyqtSignal()
     completed = pyqtSignal()
 
-    def __init__(self, parent: QObject = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self.mode: Optional[PromptMode] = None
         self.default: Union[bool, str, None] = None
@@ -444,7 +446,7 @@ class Timer(QTimer):
         _name: The name of the timer.
     """
 
-    def __init__(self, parent: QObject = None, name: str = None) -> None:
+    def __init__(self, parent: QObject| None = None, name: str | None = None) -> None:
         super().__init__(parent)
         self._start_time: Optional[float] = None
         self.timeout.connect(self._validity_check_handler)
@@ -495,7 +497,7 @@ class Timer(QTimer):
         qtutils.check_overflow(msec, 'int')
         super().setInterval(msec)
 
-    def start(self, msec: int = None) -> None:
+    def start(self, msec: int | None = None) -> None:
         """Extend start to check for overflows."""
         self._start_time = time.monotonic()
         if msec is not None:

@@ -219,7 +219,7 @@ def _format_user_agent(template: str, backend: usertypes.Backend) -> str:
     )
 
 
-def user_agent(url: QUrl = None) -> str:
+def user_agent(url: QUrl | None = None) -> str:
     """Get the user agent for the given URL, or the global one if URL is None.
 
     Note that the given URL should always be valid.

@@ -829,7 +829,7 @@ class CommandDispatcher:
     @cmdutils.argument('count', value=cmdutils.Value.count)
     @cmdutils.argument('depth', completion=miscmodels.undo)
     def undo(self, window: bool = False,
-             count: int = None, depth: int = None) -> None:
+             count: int = None, depth: int | None = None) -> None:
         """Re-open the last closed tab(s) or window.
 
         Args:
@@ -1022,7 +1022,7 @@ class CommandDispatcher:
     @cmdutils.register(instance="command-dispatcher", scope="window")
     @cmdutils.argument("index", choices=["+", "-", "start", "end"])
     @cmdutils.argument("count", value=cmdutils.Value.count)
-    def tab_move(self, index: Union[str, int] = None, count: int = None) -> None:
+    def tab_move(self, index: Union[str, int] = None, count: int | None = None) -> None:
         """Move the current tab according to the argument and [count].
 
         If neither is given, move it to the first position.
@@ -1702,7 +1702,7 @@ class CommandDispatcher:
                url: bool = False,
                quiet: bool = False,
                *,
-               world: Union[usertypes.JsWorld, int] = None) -> None:
+               world: Union[usertypes.JsWorld, int] | None = None) -> None:
         """Evaluate a JavaScript string.
 
         Args:

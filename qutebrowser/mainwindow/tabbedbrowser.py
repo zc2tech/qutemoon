@@ -10,13 +10,14 @@ import collections
 import functools
 import weakref
 import datetime
+from PyQt6 import QtGui
 import dataclasses
 from typing import (
     Any, Optional)
 from collections.abc import Mapping, MutableMapping, MutableSequence
 
 from qutebrowser.qt.widgets import QSizePolicy, QWidget, QApplication
-from qutebrowser.qt.core import pyqtSignal, pyqtSlot, QTimer, QUrl, QPoint
+from qutebrowser.qt.core import pyqtSignal, pyqtSlot, QTimer, QUrl, QPoint, QByteArray
 
 from qutebrowser.config import config
 from qutebrowser.keyinput import modeman
@@ -562,7 +563,7 @@ class TabbedBrowser(QWidget):
             else:
                 newtab = self.tabopen(background=False, idx=entry.index)
 
-            newtab.history.private_api.deserialize(entry.history)
+            newtab.history.private_api.deserialize(QByteArray(entry.history))
             newtab.set_pinned(entry.pinned)
             newtab.setFocus()
 
@@ -604,10 +605,10 @@ class TabbedBrowser(QWidget):
     @pyqtSlot('QUrl', bool)
     @pyqtSlot('QUrl', bool, bool)
     def tabopen(
-            self, url: QUrl = None,
-            background: bool = None,
+            self, url: QUrl|None = None,
+            background: bool|None = None,
             related: bool = True,
-            idx: int = None,
+            idx: int|None = None,
     ) -> browsertab.AbstractTab:
         """Open a new tab with a given URL.
 
@@ -1055,25 +1056,28 @@ class TabbedBrowser(QWidget):
             url=url_string, error=msg)
         QTimer.singleShot(100, lambda: show_error_page(error_page))
 
-    def resizeEvent(self, e):
+    # def resizeEvent(self, a0: typing.Optional[QtGui.QResizeEvent]) -> None: ...
+    def resizeEvent(self, a0: Optional[QtGui.QResizeEvent]):
         """Extend resizeEvent of QWidget to emit a resized signal afterwards.
 
         Args:
             e: The QResizeEvent
         """
-        super().resizeEvent(e)
+        super().resizeEvent(a0)
         self.resized.emit(self.geometry())
 
-    def wheelEvent(self, e):
+    # def wheelEvent(self, a0: typing.Optional[QtGui.QWheelEvent]) -> None: ...
+    def wheelEvent(self, a0:Optional[QtGui.QWheelEvent]):
         """Override wheelEvent of QWidget to forward it to the focused tab.
 
         Args:
             e: The QWheelEvent
         """
         if self._now_focused is not None:
-            self._now_focused.wheelEvent(e)
+            self._now_focused.wheelEvent(a0)
         else:
-            e.ignore()
+            if a0 is not None:
+                a0.ignore()
 
     def set_mark(self, key):
         """Set a mark at the current scroll position in the current tab.

@@ -80,7 +80,7 @@ class NoOptionError(Error):
     def __init__(self, option: str, *,
                  all_names: list[str] = None,
                  deleted: bool = False,
-                 renamed: str = None) -> None:
+                 renamed: str | None = None) -> None:
         if deleted:
             assert renamed is None
             suffix = ' (this option was removed from qutebrowser)'

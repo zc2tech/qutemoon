@@ -1160,7 +1160,7 @@ def gui_platform_info() -> str:
     return info
 
 
-def pastebin_version(pbclient: pastebin.PastebinClient = None) -> None:
+def pastebin_version(pbclient: pastebin.PastebinClient | None = None) -> None:
     """Pastebin the version and log the url to messages."""
     def _yank_url(url: str) -> None:
         utils.set_clipboard(url)

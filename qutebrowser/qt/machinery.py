@@ -42,7 +42,7 @@ _WRAPPER_OVERRIDE = None  # type: ignore[var-annotated]
 
 WRAPPERS = [
     "PyQt6",
-    "PyQt5",
+    # "PyQt5",
     # Needs more work
     # "PySide6",
 ]

@@ -185,7 +185,7 @@ class MainWindow(QWidget):
     def __init__(self, *,
                  private: bool,
                  geometry: Optional[QByteArray] = None,
-                 parent: Optional[QWidget] = None) -> None:
+                 parent: Optional[QWidget] | None = None) -> None:
         """Create a new main window.
 
         Args:

@@ -435,7 +435,7 @@ def get_path_if_valid(pathstr: str,
     return path
 
 
-def filename_from_url(url: QUrl, fallback: str = None) -> Optional[str]:
+def filename_from_url(url: QUrl, fallback: str | None = None) -> Optional[str]:
     """Get a suitable filename from a URL.
 
     Args:

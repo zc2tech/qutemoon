@@ -68,7 +68,7 @@ class Message(QLabel):
         return Qt.TextFormat.RichText if info.rich else Qt.TextFormat.PlainText
 
     @classmethod
-    def from_info(cls, info: message.MessageInfo, parent: QWidget = None) -> "Message":
+    def from_info(cls, info: message.MessageInfo, parent: QWidget | None = None) -> "Message":
         return cls(
             level=info.level,
             text=info.text,

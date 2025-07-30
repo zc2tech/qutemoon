@@ -30,7 +30,10 @@ elif machinery.USE_PYQT5 or typing.TYPE_CHECKING:
     # the unions there is missing.
     # This causes various issues inside browser/webkit/, but we ignore those in
     # .mypy.ini because we don't really care much about QtWebKit anymore.
-    from PyQt5.QtWebKit import *
+    
+    # from PyQt5.QtWebKit import *
+    pass
+    
 elif machinery.USE_PYQT6:
     raise machinery.Unavailable()
 else:

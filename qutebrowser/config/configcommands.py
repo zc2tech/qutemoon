@@ -75,7 +75,7 @@ class ConfigCommands:
     @cmdutils.argument('pattern', flag='u')
     def set(self, win_id: int, option: str = None, value: str = None,
             temp: bool = False, print_: bool = False,
-            *, pattern: str = None) -> None:
+            *, pattern: str | None = None) -> None:
         """Set an option.
 
         If the option name ends with '?' or no value is provided, the

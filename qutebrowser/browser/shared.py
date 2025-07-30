@@ -83,38 +83,40 @@ def authentication_required(url, authenticator, abort_on):
     return answer
 
 
-def _format_msg(msg: str) -> str:
+def _format_msg(msg: str|None) -> str:
     """Convert message to HTML suitable for rendering."""
+    if(msg is None):
+        return ""
     return html.escape(msg).replace('\n', '<br />')
 
 
-def javascript_confirm(url, js_msg, abort_on):
+def javascript_confirm(securityOrigin: QUrl, msg: Optional[str], abort_on):
     """Display a javascript confirm prompt."""
-    log.js.debug("confirm: {}".format(js_msg))
+    log.js.debug("confirm: {}".format(msg))
     if config.val.content.javascript.modal_dialog:
         raise CallSuper
 
-    msg = 'From <b>{}</b>:<br/>{}'.format(html.escape(url.toDisplayString()),
-                                          _format_msg(js_msg))
-    urlstr = url.toString(QUrl.UrlFormattingOption.RemovePassword | QUrl.ComponentFormattingOption.FullyEncoded)
-    ans = message.ask('Javascript confirm', msg,
+    newMsg = 'From <b>{}</b>:<br/>{}'.format(html.escape(securityOrigin.toDisplayString()),
+                                          _format_msg(msg))
+    urlstr = securityOrigin.toString(QUrl.UrlFormattingOption.RemovePassword | QUrl.ComponentFormattingOption.FullyEncoded)
+    ans = message.ask('Javascript confirm', newMsg,
                       mode=usertypes.PromptMode.yesno,
                       abort_on=abort_on, url=urlstr)
     return bool(ans)
 
 
-def javascript_prompt(url, js_msg, default, abort_on):
+def javascript_prompt(securityOrigin: QUrl, msg: Optional[str], default, abort_on):
     """Display a javascript prompt."""
-    log.js.debug("prompt: {}".format(js_msg))
+    log.js.debug("prompt: {}".format(msg))
     if config.val.content.javascript.modal_dialog:
         raise CallSuper
     if not config.val.content.javascript.prompt:
         return (False, "")
 
-    msg = '<b>{}</b> asks:<br/>{}'.format(html.escape(url.toDisplayString()),
-                                          _format_msg(js_msg))
-    urlstr = url.toString(QUrl.UrlFormattingOption.RemovePassword | QUrl.ComponentFormattingOption.FullyEncoded)
-    answer = message.ask('Javascript prompt', msg,
+    newMsg = '<b>{}</b> asks:<br/>{}'.format(html.escape(securityOrigin.toDisplayString()),
+                                          _format_msg(msg))
+    urlstr = securityOrigin.toString(QUrl.UrlFormattingOption.RemovePassword | QUrl.ComponentFormattingOption.FullyEncoded)
+    answer = message.ask('Javascript prompt', newMsg,
                          mode=usertypes.PromptMode.text,
                          default=default,
                          abort_on=abort_on, url=urlstr)
@@ -125,19 +127,19 @@ def javascript_prompt(url, js_msg, default, abort_on):
         return (True, answer)
 
 
-def javascript_alert(url, js_msg, abort_on):
+def javascript_alert(securityOrigin: QUrl, msg: Optional[str], abort_on):
     """Display a javascript alert."""
-    log.js.debug("alert: {}".format(js_msg))
+    log.js.debug("alert: {}".format(msg))
     if config.val.content.javascript.modal_dialog:
         raise CallSuper
 
     if not config.val.content.javascript.alert:
         return
 
-    msg = 'From <b>{}</b>:<br/>{}'.format(html.escape(url.toDisplayString()),
-                                          _format_msg(js_msg))
-    urlstr = url.toString(QUrl.UrlFormattingOption.RemovePassword | QUrl.ComponentFormattingOption.FullyEncoded)
-    message.ask('Javascript alert', msg, mode=usertypes.PromptMode.alert,
+    newMsg = 'From <b>{}</b>:<br/>{}'.format(html.escape(securityOrigin.toDisplayString()),
+                                          _format_msg(msg))
+    urlstr = securityOrigin.toString(QUrl.UrlFormattingOption.RemovePassword | QUrl.ComponentFormattingOption.FullyEncoded)
+    message.ask('Javascript alert', newMsg, mode=usertypes.PromptMode.alert,
                 abort_on=abort_on, url=urlstr)
 
 
@@ -193,9 +195,9 @@ def _js_log_to_ui(
 
 def javascript_log_message(
     level: usertypes.JsLogLevel,
-    source: str,
-    line: int,
-    msg: str,
+    source : str = "",
+    line: int = 0,
+    msg: str = "",
 ) -> None:
     """Display a JavaScript log message."""
     if _js_log_to_ui(level=level, source=source, line=line, msg=msg):

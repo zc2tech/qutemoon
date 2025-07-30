@@ -198,7 +198,7 @@ def _get_window_registry(window: _WindowTab) -> ObjectRegistry:
 
 def _get_registry(scope: str,
                   window: _WindowTab = None,
-                  tab: _WindowTab = None) -> ObjectRegistry:
+                  tab: _WindowTab | None = None) -> ObjectRegistry:
     """Get the correct registry for a given scope."""
     if window is not None and scope not in ['window', 'tab']:
         raise TypeError("window is set with scope {}".format(scope))
@@ -278,7 +278,7 @@ def register(name: str,
 def delete(name: str,
            scope: str = 'global',
            window: _WindowTab = None,
-           tab: _WindowTab = None) -> None:
+           tab: _WindowTab | None = None) -> None:
     """Helper function to unregister an object."""
     reg = _get_registry(scope, window, tab)
     del reg[name]

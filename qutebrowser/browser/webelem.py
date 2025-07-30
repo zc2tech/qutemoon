@@ -4,7 +4,7 @@
 
 """Generic web element related code."""
 
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING, Union, Optional
 from collections.abc import Iterator
 import collections.abc
 
@@ -136,7 +136,7 @@ class AbstractWebElement(collections.abc.MutableMapping):  # type: ignore[type-a
         """Insert the given text into the element."""
         raise NotImplementedError
 
-    def rect_on_view(self, *, elem_geometry: QRect = None,
+    def rect_on_view(self, *, elem_geometry: Optional[QRect] = None,
                      no_js: bool = False) -> QRect:
         """Get the geometry of the element relative to the webview.
 

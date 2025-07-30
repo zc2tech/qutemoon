@@ -55,3 +55,8 @@ TODO
 /misc/nsis/include
 /misc/nsis/plugins
 /wheels
+/bin
+/lib
+/.vscode
+pyvenv.cfg
+.DS_store

@@ -9,22 +9,29 @@ import pathlib
 import itertools
 import functools
 import dataclasses
-from typing import (cast, TYPE_CHECKING, Any, Optional, Union)
+from typing import (cast, TYPE_CHECKING, Any, Optional, Union,TypeVar)
 from collections.abc import Iterable, Sequence, Callable
 
 from qutebrowser.qt import machinery
 from qutebrowser.qt.core import (pyqtSignal, pyqtSlot, QUrl, QObject, QSizeF, Qt,
-                          QEvent, QPoint, QRect, QTimer)
+                          QEvent, QPoint, QRect, QTimer, QByteArray)
 from qutebrowser.qt.gui import QKeyEvent, QIcon, QPixmap
 from qutebrowser.qt.widgets import QApplication, QWidget
 from qutebrowser.qt.printsupport import QPrintDialog, QPrinter
 from qutebrowser.qt.network import QNetworkAccessManager
 
-if TYPE_CHECKING:
-    from qutebrowser.qt.webkit import QWebHistory, QWebHistoryItem
-    from qutebrowser.qt.webkitwidgets import QWebPage
-    from qutebrowser.qt.webenginecore import (
-        QWebEngineHistory, QWebEngineHistoryItem, QWebEnginePage)
+# if TYPE_CHECKING:
+#     from qutebrowser.qt.webkit import QWebHistory, QWebHistoryItem
+#     from qutebrowser.qt.webkitwidgets import QWebPage
+#     from qutebrowser.qt.webenginecore import (
+#         QWebEngineHistory, QWebEngineHistoryItem, QWebEnginePage)
+
+from PyQt6.QtCore import QUrl
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QTabWidget, QToolBar, 
+                            QLineEdit, QVBoxLayout, QWidget)
+# from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineHistory,QWebEngineHistoryItem
+
 
 from qutebrowser.keyinput import modeman
 from qutebrowser.config import config, websettings
@@ -40,14 +47,13 @@ if TYPE_CHECKING:
     from qutebrowser.browser.webengine.webview import WebEngineView
     from qutebrowser.browser.webkit.webview import WebView
 
-
 tab_id_gen = itertools.count(0)
 _WidgetType = Union["WebView", "WebEngineView"]
 
 
 def create(win_id: int,
            private: bool,
-           parent: QWidget = None) -> 'AbstractTab':
+           parent: QWidget | None = None) -> 'AbstractTab':
     """Get a QtWebKit/QtWebEngine tab object.
 
     Args:
@@ -142,7 +148,7 @@ class AbstractAction:
 
     """Attribute ``action`` of AbstractTab for Qt WebActions."""
 
-    action_base: type[Union['QWebPage.WebAction', 'QWebEnginePage.WebAction']]
+    action_base: type['QWebEnginePage.WebAction']
 
     def __init__(self, tab: 'AbstractTab') -> None:
         self._widget = cast(_WidgetType, None)
@@ -221,7 +227,7 @@ class AbstractPrinting(QObject):
     printing_finished = pyqtSignal(bool)
     pdf_printing_finished = pyqtSignal(str, bool)  # filename, ok
 
-    def __init__(self, tab: 'AbstractTab', parent: QWidget = None) -> None:
+    def __init__(self, tab: 'AbstractTab', parent: QWidget | None | None = None) -> None:
         super().__init__(parent)
         self._widget = cast(_WidgetType, None)
         self._tab = tab
@@ -369,7 +375,7 @@ class AbstractSearch(QObject):
     _Callback = Callable[[bool], None]
     _NavCallback = Callable[[SearchNavigationResult], None]
 
-    def __init__(self, tab: 'AbstractTab', parent: QWidget = None):
+    def __init__(self, tab: 'AbstractTab', parent: QWidget | None | None = None):
         super().__init__(parent)
         self._tab = tab
         self._widget = cast(_WidgetType, None)
@@ -396,7 +402,7 @@ class AbstractSearch(QObject):
     def search(self, text: str, *,
                ignore_case: usertypes.IgnoreCase = usertypes.IgnoreCase.never,
                reverse: bool = False,
-               result_cb: _Callback = None) -> None:
+               result_cb: _Callback | None = None) -> None:
         """Find the given text on the page.
 
         Args:
@@ -411,7 +417,7 @@ class AbstractSearch(QObject):
         """Clear the current search."""
         raise NotImplementedError
 
-    def prev_result(self, *, wrap: bool = False, callback: _NavCallback = None) -> None:
+    def prev_result(self, *, wrap: bool = False, callback: _NavCallback | None = None) -> None:
         """Go to the previous result of the current search.
 
         Args:
@@ -420,7 +426,7 @@ class AbstractSearch(QObject):
         """
         raise NotImplementedError
 
-    def next_result(self, *, wrap: bool = False, callback: _NavCallback = None) -> None:
+    def next_result(self, *, wrap: bool = False, callback: _NavCallback | None = None) -> None:
         """Go to the next result of the current search.
 
         Args:
@@ -434,7 +440,7 @@ class AbstractZoom(QObject):
 
     """Attribute ``zoom`` of AbstractTab for controlling zoom."""
 
-    def __init__(self, tab: 'AbstractTab', parent: QWidget = None) -> None:
+    def __init__(self, tab: 'AbstractTab', parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._tab = tab
         self._widget = cast(_WidgetType, None)
@@ -457,7 +463,7 @@ class AbstractZoom(QObject):
 
         It is a NeighborList with the zoom levels."""
         levels = config.val.zoom.levels
-        self._neighborlist: usertypes.NeighborList[float] = usertypes.NeighborList(
+        self._neighborlist: usertypes.NeighborList = usertypes.NeighborList(
             levels, mode=usertypes.NeighborList.Modes.edge)
         self._neighborlist.fuzzyval = config.val.zoom.default
 
@@ -529,7 +535,7 @@ class AbstractCaret(QObject):
     def __init__(self,
                  tab: 'AbstractTab',
                  mode_manager: modeman.ModeManager,
-                 parent: QWidget = None) -> None:
+                 parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._widget = cast(_WidgetType, None)
         self._mode_manager = mode_manager
@@ -621,7 +627,7 @@ class AbstractScroller(QObject):
     #: Used to set the special ' mark so the user can return.
     before_jump_requested = pyqtSignal()
 
-    def __init__(self, tab: 'AbstractTab', parent: QWidget = None):
+    def __init__(self, tab: 'AbstractTab', parent: QWidget | None = None):
         super().__init__(parent)
         self._tab = tab
         self._widget = cast(_WidgetType, None)
@@ -642,7 +648,7 @@ class AbstractScroller(QObject):
     def pos_perc(self) -> tuple[int, int]:
         raise NotImplementedError
 
-    def to_perc(self, x: float = None, y: float = None) -> None:
+    def to_perc(self, x: float | None = None, y: float | None = None) -> None:
         raise NotImplementedError
 
     def to_point(self, point: QPoint) -> None:
@@ -692,13 +698,13 @@ class AbstractHistoryPrivate:
 
     """Private API related to the history."""
 
-    _history: Union["QWebHistory", "QWebEngineHistory"]
+    _history: QWebEngineHistory
 
-    def serialize(self) -> bytes:
+    def serialize(self) -> QByteArray:
         """Serialize into an opaque format understood by self.deserialize."""
         raise NotImplementedError
 
-    def deserialize(self, data: bytes) -> None:
+    def deserialize(self, data: QByteArray) -> None:
         """Deserialize from a format produced by self.serialize."""
         raise NotImplementedError
 
@@ -713,13 +719,14 @@ class AbstractHistory:
 
     def __init__(self, tab: 'AbstractTab') -> None:
         self._tab = tab
-        self._history = cast(Union['QWebHistory', 'QWebEngineHistory'], None)
+        self._history:QWebEngineHistory|None = None 
+        # self._history:QWebEngineHistory | None = None
         self.private_api = AbstractHistoryPrivate()
 
     def __len__(self) -> int:
         raise NotImplementedError
 
-    def __iter__(self) -> Iterable[Union['QWebHistoryItem', 'QWebEngineHistoryItem']]:
+    def __iter__(self) -> Iterable[QWebEngineHistoryItem]:
         raise NotImplementedError
 
     def _check_count(self, count: int) -> None:
@@ -730,7 +737,7 @@ class AbstractHistory:
     def current_idx(self) -> int:
         raise NotImplementedError
 
-    def current_item(self) -> Union['QWebHistoryItem', 'QWebEngineHistoryItem']:
+    def current_item(self) -> QWebEngineHistoryItem:
         raise NotImplementedError
 
     def back(self, count: int = 1) -> None:
@@ -840,7 +847,7 @@ class AbstractAudio(QObject):
     muted_changed = pyqtSignal(bool)
     recently_audible_changed = pyqtSignal(bool)
 
-    def __init__(self, tab: 'AbstractTab', parent: QWidget = None) -> None:
+    def __init__(self, tab: 'AbstractTab', parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._widget = cast(_WidgetType, None)
         self._tab = tab
@@ -958,7 +965,7 @@ class AbstractTabPrivate:
 
     def _init_inspector(self, splitter: 'miscwidgets.InspectorSplitter',
            win_id: int,
-           parent: QWidget = None) -> 'AbstractWebInspector':
+           parent: QWidget | None = None) -> 'AbstractWebInspector':
         """Get a WebKitInspector/WebEngineInspector.
 
         Args:
@@ -1036,7 +1043,7 @@ class AbstractTab(QWidget):
     def __init__(self, *, win_id: int,
                  mode_manager: 'modeman.ModeManager',
                  private: bool,
-                 parent: QWidget = None) -> None:
+                 parent: QWidget | None = None) -> None:
         utils.unused(mode_manager)  # needed for mypy
         self.is_private = private
         self.win_id = win_id
@@ -1300,8 +1307,8 @@ class AbstractTab(QWidget):
     def run_js_async(
             self,
             code: str,
-            callback: Callable[[Any], None] = None, *,
-            world: Union[usertypes.JsWorld, int] = None
+            callback: Callable[[Any], None] | None = None, *,
+            world: Union[usertypes.JsWorld, int] | None = None
     ) -> None:
         """Run javascript async.
 
@@ -1337,7 +1344,7 @@ class AbstractTab(QWidget):
         """
         raise NotImplementedError
 
-    def grab_pixmap(self, rect: QRect = None) -> Optional[QPixmap]:
+    def grab_pixmap(self, rect: QRect | None = None) -> Optional[QPixmap]:
         """Grab a QPixmap of the displayed page.
 
         Returns None if we got a null pixmap from Qt.
